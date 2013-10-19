@@ -1,0 +1,9 @@
+.dcb-newline {
+	width: 100%;
+	float: left;
+	clear: both;
+	padding: 5px 0;
+}
+.dcb-newline .dcb-label, .dcb-newline .dcb-input,  .dcb-newline .dcb-textarea, .dcb-newline .dcb-select {
+	display: inline;
+}
