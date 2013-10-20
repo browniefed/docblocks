@@ -5,8 +5,24 @@
 	padding: 5px 0;
 }
 .dcb-newline .dcb-label, .dcb-newline .dcb-input,  .dcb-newline .dcb-textarea, .dcb-newline .dcb-select {
-	display: inline;
+	display: inline-block;
+	margin-left: 5px;
+	outline: none;
 }
+.dcb-newline .dcb-label:active, .dcb-newline .dcb-label:focus, .dcb-newline .dcb-input:active, .dcb-newline .dcb-input:focus,  
+.dcb-newline .dcb-textarea:active, .dcb-newline .dcb-textarea:focus, .dcb-newline .dcb-select:active, .dcb-newline .dcb-select:focus {
+	background-color: #f9f9f9;
+}
+.dcb-input, .dcb-textarea {
+	border: 0px;
+	border-bottom: 1px solid #333;
+}
+.dcb-textarea {
+	max-width: 100%;
+	width: 100%;
+	resize: none;
+}
+
 .dcb-plus {
 	text-align: center;
 	background: #f1f1f1;
