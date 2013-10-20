@@ -70,9 +70,9 @@ Array.prototype.insert = function(index) {
 			ractive.on("addButton", function(e) {
 				var item = e.keypath.split('.')[1];
 				if (!item) {
-					this.data.items.push(defaultTemplateClone);
+					this.data.items.push($.extend(true,{},defaultTemplateClone));
 				} else {
-					this.data.items.insert(item, defaultTemplateClone);
+					this.data.items.insert(item, $.extend(true,{},defaultTemplateClone));
 				}
 				this.update('items');
 			});
@@ -143,7 +143,7 @@ Array.prototype.insert = function(index) {
 		}
 
 		function toJson() {
-			return ractive.get();
+			return ractive.get().items;
 		}
 	
 		return {
