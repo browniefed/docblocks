@@ -21,6 +21,9 @@ var config = {
 	};
 ````
 
+This configuration creates a label and input both inline with each other (wrapped in an array).
+Then a textarea and select on separate lines.
+
 Then create a new DocBlock
 
 ```javascript
