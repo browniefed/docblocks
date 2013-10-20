@@ -8,6 +8,7 @@
 		},
 		container = contain,
 		templateArray = [],
+		compiledTemplate = '',
 		templates = {
 			label: '<div class="dcb-label {{cls}}">{{value}}</div>',
 			input: '<input type="text" class="dcb-input {{cls}}" name="{{name}}" value="{{value}}" />',
@@ -15,31 +16,55 @@
 			select: '<select name="{{name}}" class="dcb-select {{cls}}">{{#options}}<option value="{{value}}">{{text}}</option>{{/options}}</select>'
 		},
 		ractive = null,
-		daterRender = [];
+		daterRender = [],
+		iterator = 0;
 
 		config = $.extend(config, c);
 
 		function init(data) {
 			templateArray = buildTemplate(config.blocks);
-			console.log(templateArray);
-			// data.forEach(function(d,i) {
-			// 	daterRender[i] = $.extend(true, {}, config.blocks);
-			// 	daterRender[i] = addDataToBlocks(daterRender[i], d);
-			// });
+			iterator = 0;
+			data.forEach(function(d,i) {
+			 	 daterRender[i] = $.extend(true, {}, config.blocks);
+			 	 daterRender[i] = addDataToBlocks(daterRender[i], d);
+			 });
+			iterator = 0;
+			compiledTemplate = compileTemplate(templateArray, true);
+		    // container.innerHTML = compiledTemplate;
 
-			// ractive = new Ractive( {
-			// 	el: container,
-			// 	template: '{{#items}}' + templateString + '{{/items}}',
-			// 	data: {
-			// 		items: daterRender
-			// 	}
-			// });
-			// console.log(ractive)
+
+			ractive = new Ractive( {
+				el: container,
+				template: '{{#items}}' + compiledTemplate + '{{/items}}',
+				data: {
+					items: data
+				}
+			});
+		}
+
+		function compileTemplate(templates, inline) {
+			var templateString = '';
+			templates.forEach(function(template, index) {
+				if (template instanceof Array) {
+					templateString +=  '<div class="dcb-newline">' + compileTemplate(template, false) + '</div>';
+				} else {
+					templateString += (inline ? '<div class="dcb-newline">' : '');
+					templateString += '{{# (i ==' + iterator + ')}}' + template + '{{/ ()}}';
+					templateString += (inline ? '</div>' : '');
+					iterator++;
+				}
+			});
+			return templateString;
+
 		}
 
 		function addDataToBlocks(daterContainer, daters) {
 			daters.forEach(function(data, index) {
-				daterContainer[index].value = data;
+				if (data instanceof Array) {
+					daterContainer[index] = addDataToBlocks(daterContainer[index], data);
+				} else {
+					daterContainer[index].value = data;
+				}
 			});
 			return daterContainer
 		}
