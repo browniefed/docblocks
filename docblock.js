@@ -10,14 +10,18 @@
 		templateArray = [],
 		compiledTemplate = '',
 		templates = {
+			addButton: '<div class="dcb-newline"><div class="dcb-plus">+</div></div>',
 			label: '<div class="dcb-label {{cls}}">{{value}}</div>',
 			input: '<input type="text" class="dcb-input {{cls}}" name="{{name}}" value="{{value}}" />',
 			textarea: '<textarea class="dcb-textarea {{cls}}">{{value}}</textarea>',
 			select: '<select name="{{name}}" class="dcb-select {{cls}}">{{#options}}<option value="{{value}}">{{text}}</option>{{/options}}</select>'
 		},
+		hash = 'dcb',
 		ractive = null,
 		daterRender = [],
-		iterator = 0;
+		flatData  = [],
+		iterator = 0,
+		line = 1;
 
 		config = $.extend(config, c);
 
@@ -27,17 +31,19 @@
 			data.forEach(function(d,i) {
 			 	 daterRender[i] = $.extend(true, {}, config.blocks);
 			 	 daterRender[i] = addDataToBlocks(daterRender[i], d);
+			 	 iterator = 0;
 			 });
 			iterator = 0;
 			compiledTemplate = compileTemplate(templateArray, true);
-		    // container.innerHTML = compiledTemplate;
-
+			daterRender.forEach(function(dater) {
+				flatData.push(flattenData([dater], false));
+			});
 
 			ractive = new Ractive( {
 				el: container,
-				template: '{{#items}}' + compiledTemplate + '{{/items}}',
+				template: '{{#items}}' + templates.addButton + compiledTemplate + templates.addButton + '{{/items}}',
 				data: {
-					items: data
+					items: flatData
 				}
 			});
 		}
@@ -49,13 +55,31 @@
 					templateString +=  '<div class="dcb-newline">' + compileTemplate(template, false) + '</div>';
 				} else {
 					templateString += (inline ? '<div class="dcb-newline">' : '');
-					templateString += '{{# (i ==' + iterator + ')}}' + template + '{{/ ()}}';
+					templateString += '{{# ' + hash + iterator + '}}' + template + '{{/ ' + hash + iterator + '}}';
 					templateString += (inline ? '</div>' : '');
 					iterator++;
 				}
 			});
 			return templateString;
+		}
 
+		function flattenData(daters, passedLine) {
+			var flatterData = {};
+			for (dater in daters[0]) {
+				var currentDater = daters[0][dater];
+				if (currentDater instanceof Array) {
+					flatterData = $.extend(flatterData, flattenData([currentDater], line));
+					line++;
+				} else {
+					flatterData[currentDater.hash] = currentDater;
+					flatterData[currentDater.hash].line = passedLine || line;
+					if (!passedLine) {
+						line++;
+					}
+					
+				}
+			}
+			return flatterData;
 		}
 
 		function addDataToBlocks(daterContainer, daters) {
@@ -64,6 +88,8 @@
 					daterContainer[index] = addDataToBlocks(daterContainer[index], data);
 				} else {
 					daterContainer[index].value = data;
+					daterContainer[index].hash = hash + iterator;
+					iterator++;
 				}
 			});
 			return daterContainer
@@ -84,8 +110,7 @@
 		}
 
 		function toJson() {
-			//read through all nodes
-			//return array in correct order with same structure as defined block
+			return ractive.get();
 		}
 	
 		return {

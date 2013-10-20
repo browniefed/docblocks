@@ -7,3 +7,8 @@
 .dcb-newline .dcb-label, .dcb-newline .dcb-input,  .dcb-newline .dcb-textarea, .dcb-newline .dcb-select {
 	display: inline;
 }
+.dcb-plus {
+	text-align: center;
+	background: #f1f1f1;
+	color: #333;
+}
