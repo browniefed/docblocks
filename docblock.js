@@ -10,34 +10,51 @@
 		templateArray = [],
 		compiledTemplate = '',
 		templates = {
-			addButton: '<div class="dcb-newline"><div class="dcb-plus">+</div></div>',
-			label: '<div class="dcb-label {{cls}}">{{value}}</div>',
-			input: '<input type="text" class="dcb-input {{cls}}" name="{{name}}" value="{{value}}" />',
-			textarea: '<textarea class="dcb-textarea {{cls}}">{{value}}</textarea>',
+			addButton: '<div class="dcb-newline" on-click="addButton"><div class="dcb-plus">+</div></div>',
+			label: '<div class="dcb-label {{cls}}">{{^value}}{{placeholder}}{{/value}}{{value}}</div>',
+			input: '<input type="text" class="dcb-input {{cls}}" name="{{name}}" value="{{value}}" placeholder="{{placeholder}}"/>',
+			textarea: '<textarea class="dcb-textarea {{cls}}" placeholder="{{placeholder}}">{{value}}</textarea>',
 			select: '<select name="{{name}}" class="dcb-select {{cls}}">{{#options}}<option value="{{value}}">{{text}}</option>{{/options}}</select>'
 		},
 		hash = 'dcb',
 		ractive = null,
 		daterRender = [],
+		dataCopy = [],
 		flatData  = [],
 		iterator = 0,
-		line = 1;
+		line = 1,
+		defaultTemplateClone = null;
 
 		config = $.extend(config, c);
 
 		function init(data) {
 			templateArray = buildTemplate(config.blocks);
 			iterator = 0;
-			data.forEach(function(d,i) {
-			 	 daterRender[i] = $.extend(true, {}, config.blocks);
-			 	 daterRender[i] = addDataToBlocks(daterRender[i], d);
-			 	 iterator = 0;
-			 });
+			if (data && data.length) {
+				data.forEach(function(d,i) {
+				 	 daterRender[i] = $.extend(true, {}, config.blocks);
+				 	 daterRender[i] = addDataToBlocks(daterRender[i], d);
+				 	 iterator = 0;
+				 });
+				iterator = 0;
+				compiledTemplate = compileTemplate(templateArray, true);
+				daterRender.forEach(function(dater) {
+					flatData.push(flattenData([dater], false));
+				});
+			}
+
 			iterator = 0;
-			compiledTemplate = compileTemplate(templateArray, true);
-			daterRender.forEach(function(dater) {
-				flatData.push(flattenData([dater], false));
+			dataCopy[0] = $.extend(true, {}, config.blocks);
+			dataCopy[0] = addDataToBlocks(dataCopy[0], config.blocks, true);
+			iterator = 0;
+			dataCopy.forEach(function(dater) {
+				defaultTemplateClone = flattenData([dater], false);
 			});
+
+			if (!data && data.length == 0) {
+				flatData.push(defaultTemplateClone);
+			}
+			
 
 			ractive = new Ractive( {
 				el: container,
@@ -45,6 +62,10 @@
 				data: {
 					items: flatData
 				}
+			});
+			ractive.on("addButton", function(e) {
+				this.data.items.push(defaultTemplateClone);
+				this.update('items');
 			});
 		}
 
@@ -82,11 +103,14 @@
 			return flatterData;
 		}
 
-		function addDataToBlocks(daterContainer, daters) {
+		function addDataToBlocks(daterContainer, daters, def) {
 			daters.forEach(function(data, index) {
 				if (data instanceof Array) {
-					daterContainer[index] = addDataToBlocks(daterContainer[index], data);
+					daterContainer[index] = addDataToBlocks(daterContainer[index], data, def);
 				} else {
+					if (def) {
+						data = '';
+					}
 					daterContainer[index].value = data;
 					daterContainer[index].hash = hash + iterator;
 					iterator++;
