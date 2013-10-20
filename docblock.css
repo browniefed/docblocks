@@ -13,6 +13,7 @@
 .dcb-newline .dcb-textarea:active, .dcb-newline .dcb-textarea:focus, .dcb-newline .dcb-select:active, .dcb-newline .dcb-select:focus {
 	background-color: #f9f9f9;
 }
+
 .dcb-input, .dcb-textarea {
 	border: 0px;
 	border-bottom: 1px solid #333;
@@ -27,4 +28,10 @@
 	text-align: center;
 	background: #f1f1f1;
 	color: #333;
+}
+.dcb-plus:hover {
+	background: #DDD;
+}
+.dcb-plus:active {
+	background: #CCC;
 }

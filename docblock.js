@@ -1,4 +1,8 @@
-
+Array.prototype.insert = function(index) {
+    this.splice.apply(this, [index, 0].concat(
+        Array.prototype.slice.call(arguments, 1)));
+    return this;
+};
 
 (function(window, document, $) {
 
@@ -10,7 +14,7 @@
 		templateArray = [],
 		compiledTemplate = '',
 		templates = {
-			addButton: '<div class="dcb-newline" on-click="addButton"><div class="dcb-plus">+</div></div>',
+			addButton: '<div class="dcb-newline" on-click="addButton" data-index="{{i}}"><div class="dcb-plus">+</div></div>',
 			label: '<div class="dcb-label {{cls}}">{{^value}}{{placeholder}}{{/value}}{{value}}</div>',
 			input: '<input type="text" class="dcb-input {{cls}}" name="{{name}}" value="{{value}}" placeholder="{{placeholder}}"/>',
 			textarea: '<textarea class="dcb-textarea {{cls}}" placeholder="{{placeholder}}">{{value}}</textarea>',
@@ -58,13 +62,18 @@
 
 			ractive = new Ractive( {
 				el: container,
-				template: '{{#items}}' + templates.addButton + compiledTemplate + templates.addButton + '{{/items}}',
+				template: '{{#items:i}}' + templates.addButton + compiledTemplate + '{{/items}}' + templates.addButton,
 				data: {
 					items: flatData
 				}
 			});
 			ractive.on("addButton", function(e) {
-				this.data.items.push(defaultTemplateClone);
+				var item = e.keypath.split('.')[1];
+				if (!item) {
+					this.data.items.push(defaultTemplateClone);
+				} else {
+					this.data.items.insert(item, defaultTemplateClone);
+				}
 				this.update('items');
 			});
 		}
